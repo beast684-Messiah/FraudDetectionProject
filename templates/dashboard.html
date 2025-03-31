@@ -1,0 +1,99 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - Healthcare Fraud Detection{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Cases</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_cases }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            High Risk Cases</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.high_risk_cases }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Average Fraud Rate</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ (stats.avg_fraud_rate * 100)|round(1) }}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Most Common State</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.most_common_state }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Records -->
+    <div class="col-xl-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Assessment Records</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Fraud Probability</th>
+                                <th>Risk Level</th>
+                                <th>Claim Count</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in history[:10] %}
+                            <tr class="{% if record.prediction > 0.7 %}table-danger{% elif record.prediction > 0.3 %}table-warning{% else %}table-success{% endif %}">
+                                <td>{{ record.timestamp }}</td>
+                                <td>{{ (record.prediction * 100)|round(1) }}%</td>
+                                <td>{{ record.risk_level }}</td>
+                                <td>{% if record.form_data.ProviderClaimCount is defined %}{{ record.form_data.ProviderClaimCount }}{% else %}--{% endif %}</td>
+                                <td>{% if record.form_data.State is defined %}{{ record.form_data.State }}{% else %}--{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,206 @@
+{% extends "layout.html" %}
+
+{% block title %}Healthcare Fraud Detection - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Fraud Risk Assessment</h3>
+            </div>
+            <div class="card-body">
+                <p class="lead">Please enter medical claim details to assess fraud risk.</p>
+                
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <form id="fraud-form" action="/predict" method="post">
+                    <!-- ProviderClaimCount and DeductibleAmtPaid -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="provider_claim_count" class="form-label">Provider Claim Count (1-10000)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" class="form-control" id="provider_claim_count" name="provider_claim_count" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="deductible_amt_paid" class="form-label">Deductible Amount Paid</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" id="deductible_amt_paid" name="deductible_amt_paid" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- State and County -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="state" class="form-label">State (1-54)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="1" max="54" class="form-control" id="state" name="state" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="county" class="form-label">County (1-999)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="1" max="999" class="form-control" id="county" name="county" required>
+                        </div>
+                    </div>
+
+                    <!-- Diagnosis Group Code -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="diagnosis_group_code" class="form-label">Diagnosis Group Code (0-117)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="0" max="117" class="form-control" id="diagnosis_group_code" name="diagnosis_group_code" required>
+                        </div>
+                    </div>
+
+                    <!-- Physicians -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="attending_physician" class="form-label">Attending Physician (0-706)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="0" max="706" class="form-control" id="attending_physician" name="attending_physician" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="operating_physician" class="form-label">Operating Physician (0-55)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="0" max="55" class="form-control" id="operating_physician" name="operating_physician" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="other_physician" class="form-label">Other Physician (0-162)</label>
+                            <input type="text" pattern="[0-9]*" inputmode="numeric" min="0" max="162" class="form-control" id="other_physician" name="other_physician" required>
+                        </div>
+                    </div>
+
+                    <!-- Physician Same and Count -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="phy_same" class="form-label">Physician Similarity</label>
+                            <select class="form-select" id="phy_same" name="phy_same" required>
+                                <option value="">Select category</option>
+                                <option value="0">0 - Completely different</option>
+                                <option value="1">1 - Minimal overlap</option>
+                                <option value="2">2 - Significant overlap</option>
+                                <option value="3">3 - Completely identical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phy_count" class="form-label">Physician Count</label>
+                            <select class="form-select" id="phy_count" name="phy_count" required>
+                                <option value="">Select category</option>
+                                <option value="0">0 - No physicians</option>
+                                <option value="1">1 - Single physician</option>
+                                <option value="2">2 - Two physicians</option>
+                                <option value="3">3 - Three or more physicians</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                            <span class="button-text">Assess Fraud Risk</span>
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('fraud-form').addEventListener('submit', function(e) {
+    const button = document.getElementById('submit-btn');
+    const buttonText = button.querySelector('.button-text');
+    const spinner = button.querySelector('.spinner-border');
+    
+    // Validate integer fields
+    const integerFields = [
+        {id: 'provider_claim_count', min: 1, max: 10000},
+        {id: 'state', min: 1, max: 54},
+        {id: 'county', min: 1, max: 999},
+        {id: 'diagnosis_group_code', min: 0, max: 117},
+        {id: 'attending_physician', min: 0, max: 706},
+        {id: 'operating_physician', min: 0, max: 55},
+        {id: 'other_physician', min: 0, max: 162}
+    ];
+    
+    let hasError = false;
+    
+    integerFields.forEach(function(fieldInfo) {
+        const field = document.getElementById(fieldInfo.id);
+        const value = field.value.trim();
+        
+        // Check if value is an integer
+        if (!/^\d+$/.test(value)) {
+            e.preventDefault();
+            field.setCustomValidity('Please enter an integer value');
+            field.reportValidity();
+            hasError = true;
+            return;
+        }
+        
+        // Check if value is within range
+        const numValue = parseInt(value, 10);
+        if (numValue < fieldInfo.min || numValue > fieldInfo.max) {
+            e.preventDefault();
+            field.setCustomValidity(`Please enter a value between ${fieldInfo.min} and ${fieldInfo.max}`);
+            field.reportValidity();
+            hasError = true;
+            return;
+        }
+        
+        field.setCustomValidity('');
+    });
+    
+    if (hasError) {
+        return;
+    }
+    
+    // Show loading state
+    buttonText.textContent = 'Processing...';
+    spinner.classList.remove('d-none');
+    button.disabled = true;
+});
+
+// Reset form when page loads
+window.onload = function() {
+    document.getElementById('fraud-form').reset();
+    const button = document.getElementById('submit-btn');
+    const buttonText = button.querySelector('.button-text');
+    const spinner = button.querySelector('.spinner-border');
+    
+    buttonText.textContent = 'Assess Fraud Risk';
+    spinner.classList.add('d-none');
+    button.disabled = false;
+    
+    // Add input validation for all integer fields
+    const integerFields = [
+        {id: 'provider_claim_count', min: 1, max: 10000},
+        {id: 'state', min: 1, max: 54},
+        {id: 'county', min: 1, max: 999},
+        {id: 'diagnosis_group_code', min: 0, max: 117},
+        {id: 'attending_physician', min: 0, max: 706},
+        {id: 'operating_physician', min: 0, max: 55},
+        {id: 'other_physician', min: 0, max: 162}
+    ];
+    
+    integerFields.forEach(function(fieldInfo) {
+        const field = document.getElementById(fieldInfo.id);
+        
+        field.addEventListener('input', function() {
+            // Only allow numeric input
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Check if value is within range
+            if (this.value.trim() !== '') {
+                const numValue = parseInt(this.value, 10);
+                if (numValue < fieldInfo.min) {
+                    this.value = fieldInfo.min;
+                } else if (numValue > fieldInfo.max) {
+                    this.value = fieldInfo.max;
+                }
+            }
+        });
+    });
+};
+</script>
+{% endblock %} 

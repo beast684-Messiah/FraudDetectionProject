@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+
+{% block title %}Fraud Assessment Result{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Fraud Risk Assessment Result</h3>
+                <a href="/" class="btn btn-light">New Assessment</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="fraud-gauge-container mb-4">
+                            <canvas id="fraudGauge"></canvas>
+                        </div>
+                        
+                        <div class="alert alert-{{ risk_class }} text-center">
+                            <h4 class="alert-heading">{{ risk_level }}</h4>
+                            <h5 class="mb-0">Fraud Probability: {{ prediction|round(2) }}%</h5>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Risk Factors</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="riskFactorsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Claim Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th>Provider Claim Count</th>
+                                            <td>{{ data.ProviderClaimCount }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Deductible Amount Paid</th>
+                                            <td>${{ data.DeductibleAmtPaid|round(2) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>State</th>
+                                            <td>{{ data.State }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>County</th>
+                                            <td>{{ data.County }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Diagnosis Group Code</th>
+                                            <td>{{ data.DiagnosisGroupCode }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Attending Physician</th>
+                                            <td>{{ data.AttendingPhysician }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Operating Physician</th>
+                                            <td>{{ data.OperatingPhysician }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Other Physician</th>
+                                            <td>{{ data.OtherPhysician }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Physician Similarity</th>
+                                            <td>
+                                                {% if data.phy_same == 0 %}
+                                                    0 - Completely different
+                                                {% elif data.phy_same == 1 %}
+                                                    1 - Minimal overlap
+                                                {% elif data.phy_same == 2 %}
+                                                    2 - Significant overlap
+                                                {% elif data.phy_same == 3 %}
+                                                    3 - Completely identical
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Physician Count</th>
+                                            <td>
+                                                {% if data.phy_count == 0 %}
+                                                    0 - No physicians
+                                                {% elif data.phy_count == 1 %}
+                                                    1 - Single physician
+                                                {% elif data.phy_count == 2 %}
+                                                    2 - Two physicians
+                                                {% elif data.phy_count == 3 %}
+                                                    3 - Three or more physicians
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recommended Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    {% if prediction < 30 %}
+                                        <li class="list-group-item list-group-item-success">
+                                            <i class="bi bi-check-circle-fill me-2"></i>Process claim normally
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-info-circle me-2"></i>No further investigation needed
+                                        </li>
+                                    {% elif prediction < 60 %}
+                                        <li class="list-group-item list-group-item-warning">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Conduct standard verification
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-search me-2"></i>Review documentation carefully
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-telephone me-2"></i>Consider follow-up phone call
+                                        </li>
+                                    {% else %}
+                                        <li class="list-group-item list-group-item-danger">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>Red Flag for detailed investigation
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-file-earmark-text me-2"></i>Request additional documentation
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-person me-2"></i>Assign to senior claims investigator
+                                        </li>
+                                        <li class="list-group-item">
+                                            <i class="bi bi-clock-history me-2"></i>Delay payment pending investigation
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-section mt-4">
+                    <button class="btn btn-outline-primary" onclick="provideFeedback()">
+                        Provide Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 定义变量
+    var fraudProbability = {{ prediction|round(2) }} / 100;
+    
+    // 绘制仪表盘图表
+    var gaugeCtx = document.getElementById('fraudGauge').getContext('2d');
+    var gaugeChart = new Chart(gaugeCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [fraudProbability, 1 - fraudProbability],
+                backgroundColor: [
+                    fraudProbability < 0.3 ? '#28a745' : 
+                    fraudProbability < 0.7 ? '#ffc107' : '#dc3545',
+                    '#e9ecef'
+                ],
+                borderWidth: 0,
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            }
+        }
+    });
+    
+    // 在仪表盘下方显示数值
+    var displayValue = document.createElement('div');
+    displayValue.style.textAlign = 'center';
+    displayValue.style.marginTop = '-40px';
+    displayValue.style.fontSize = '24px';
+    displayValue.style.fontWeight = 'bold';
+    displayValue.style.color = fraudProbability < 0.3 ? '#28a745' : 
+                              fraudProbability < 0.7 ? '#ffc107' : '#dc3545';
+    displayValue.innerHTML = '{{ prediction|round(2) }}%<br><span style="font-size: 14px; color: #666;">Fraud Risk</span>';
+    document.querySelector('.fraud-gauge-container').appendChild(displayValue);
+    
+    // 特征标签和重要性值
+    var featureLabels = [
+        'Provider Claim Count', 
+        'Attending Physician', 
+        'Other Physician',
+        'State', 
+        'Operating Physician', 
+        'County', 
+        'Diagnosis Group Code', 
+        'Deductible Amount Paid', 
+        'Physician Similarity', 
+        'Physician Count'
+    ];
+    
+    var importanceValues = [
+        0.25, 0.18, 0.15, 0.12, 0.10, 
+        0.08, 0.05, 0.03, 0.02, 0.02
+    ];
+    
+    // 显示特征重要性图表
+    var featuresCtx = document.getElementById('riskFactorsChart').getContext('2d');
+    var riskFactorsChart = new Chart(featuresCtx, {
+        type: 'bar',
+        data: {
+            labels: featureLabels,
+            datasets: [{
+                label: 'Feature Importance',
+                data: importanceValues,
+                backgroundColor: fraudProbability < 0.3 ? 
+                    'rgba(40, 167, 69, 0.7)' : 
+                    fraudProbability < 0.7 ? 
+                        'rgba(255, 193, 7, 0.7)' : 
+                        'rgba(220, 53, 69, 0.7)',
+                borderColor: 'rgba(0, 0, 0, 0.1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 0.3
+                }
+            }
+        }
+    });
+    
+    // 反馈功能
+    function provideFeedback() {
+        alert('Feedback feature coming soon!');
+    }
+</script>
+{% endblock %} 

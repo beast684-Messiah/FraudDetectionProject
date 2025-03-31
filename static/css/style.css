@@ -1,0 +1,101 @@
+/* 主要样式 */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* 表单样式 */
+.form-label {
+    font-weight: 500;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* 导航栏样式 */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* 仪表板样式 */
+.fraud-gauge-container {
+    max-width: 350px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* 结果样式 */
+.alert {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 12px 20px;
+}
+
+.list-group-item i {
+    margin-right: 8px;
+}
+
+/* 表格样式 */
+.table th {
+    width: 40%;
+    font-weight: 600;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    .card-header h3 {
+        font-size: 1.5rem;
+    }
+    
+    .fraud-gauge-container {
+        max-width: 250px;
+    }
+}
+
+/* 按钮样式 */
+.btn-primary {
+    position: relative;
+}
+
+.btn-primary:disabled {
+    cursor: not-allowed;
+}
+
+.spinner-border {
+    margin-left: 8px;
+}
+
+/* 表单样式 */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* 添加加载动画 */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+} 

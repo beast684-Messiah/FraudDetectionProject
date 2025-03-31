@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block title %}Settings - Insurance Fraud Detection{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Risk Assessment Settings</h3>
+            </div>
+            <div class="card-body">
+                <!-- 风险阈值设置 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Risk Threshold Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-4">
+                            <label class="form-label">High Risk Threshold</label>
+                            <input type="range" class="form-range" id="highRiskThreshold" min="0" max="100" value="70">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">0%</small>
+                                <small class="text-danger" id="highRiskValue">70%</small>
+                                <small class="text-muted">100%</small>
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Medium Risk Threshold</label>
+                            <input type="range" class="form-range" id="mediumRiskThreshold" min="0" max="100" value="40">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">0%</small>
+                                <small class="text-warning" id="mediumRiskValue">40%</small>
+                                <small class="text-muted">100%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通知设置 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Notification Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications">
+                            <label class="form-check-label" for="emailNotifications">
+                                Email notifications for high-risk cases
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="exportReports">
+                            <label class="form-check-label" for="exportReports">
+                                Auto-export reports for high-risk cases
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保存按钮 -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 更新阈值显示
+    const highRiskSlider = document.getElementById('highRiskThreshold');
+    const highRiskValue = document.getElementById('highRiskValue');
+    const mediumRiskSlider = document.getElementById('mediumRiskThreshold');
+    const mediumRiskValue = document.getElementById('mediumRiskValue');
+
+    highRiskSlider.addEventListener('input', function() {
+        highRiskValue.textContent = this.value + '%';
+    });
+
+    mediumRiskSlider.addEventListener('input', function() {
+        mediumRiskValue.textContent = this.value + '%';
+    });
+
+    // 保存设置
+    window.saveSettings = function() {
+        const settings = {
+            highRiskThreshold: highRiskSlider.value,
+            mediumRiskThreshold: mediumRiskSlider.value,
+            emailNotifications: document.getElementById('emailNotifications').checked,
+            exportReports: document.getElementById('exportReports').checked
+        };
+
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Settings saved successfully!');
+            } else {
+                alert('Error saving settings');
+            }
+        });
+    };
+});
+</script>
+{% endblock %} 

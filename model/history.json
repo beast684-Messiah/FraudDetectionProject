@@ -1,0 +1,110 @@
+[
+    {
+        "id": 1,
+        "timestamp": "2025-03-28 15:57:10",
+        "form_data": {
+            "policy_annual_premium": 12321.0,
+            "umbrella_limit": 1231.0,
+            "capital_gains": 12321.0,
+            "capital_loss": 123.0,
+            "incident_severity": "Major Damage",
+            "insured_hobbies": "cross-fit",
+            "insured_occupation": "prof-specialty",
+            "insured_education_level": "Masters",
+            "incident_state": "CA",
+            "insured_relationship": "husband"
+        },
+        "prediction": 0.15,
+        "risk_level": "Very Low"
+    },
+    {
+        "id": 2,
+        "timestamp": "2025-03-28 16:10:38",
+        "form_data": {
+            "policy_annual_premium": 1231.0,
+            "umbrella_limit": 12321.0,
+            "capital_gains": 12312.0,
+            "capital_loss": 2132.0,
+            "incident_severity": "Minor Damage",
+            "insured_hobbies": "golf",
+            "insured_occupation": "sales",
+            "insured_education_level": "College",
+            "incident_state": "CA",
+            "insured_relationship": "husband"
+        },
+        "prediction": 0.0,
+        "risk_level": "Very Low"
+    },
+    {
+        "id": 4,
+        "timestamp": "2025-03-28 16:35:10",
+        "form_data": {
+            "policy_annual_premium": 12312321.0,
+            "umbrella_limit": 1232123.0,
+            "capital_gains": 123.0,
+            "capital_loss": 1231.0,
+            "incident_severity": "Major Damage",
+            "insured_hobbies": "skydiving",
+            "insured_occupation": "sales",
+            "insured_education_level": "College",
+            "incident_state": "NY",
+            "insured_relationship": "wife"
+        },
+        "prediction": 0.9427485064802474,
+        "risk_level": "Very High"
+    },
+    {
+        "id": 9,
+        "timestamp": "2025-03-30 22:00:02",
+        "form_data": {
+            "ProviderClaimCount": 8752,
+            "DeductibleAmtPaid": 1950.75,
+            "AttendingPhysician": 522,
+            "OperatingPhysician": 47,
+            "OtherPhysician": 124,
+            "State": 35,
+            "County": 872,
+            "DiagnosisGroupCode": 92,
+            "phy_same": 3,
+            "phy_count": 3
+        },
+        "prediction": 0.9666666666666667,
+        "risk_level": "High Risk"
+    },
+    {
+        "id": 9,
+        "timestamp": "2025-03-30 22:21:33",
+        "form_data": {
+            "ProviderClaimCount": 688,
+            "DeductibleAmtPaid": 0.0,
+            "AttendingPhysician": 84,
+            "OperatingPhysician": 0,
+            "OtherPhysician": 0,
+            "State": 39,
+            "County": 290,
+            "DiagnosisGroupCode": 0,
+            "phy_same": 3,
+            "phy_count": 1
+        },
+        "prediction": 0.4154689398071995,
+        "risk_level": "Medium Risk"
+    },
+    {
+        "id": 10,
+        "timestamp": "2025-03-30 22:22:16",
+        "form_data": {
+            "ProviderClaimCount": 118,
+            "DeductibleAmtPaid": 0.0,
+            "AttendingPhysician": 1,
+            "OperatingPhysician": 0,
+            "OtherPhysician": 0,
+            "State": 10,
+            "County": 440,
+            "DiagnosisGroupCode": 0,
+            "phy_same": 3,
+            "phy_count": 1
+        },
+        "prediction": 0.19116082774439158,
+        "risk_level": "Low Risk"
+    }
+]
